@@ -53,6 +53,11 @@ button.primary-button { background: #b0dfbe; color: #112319; border-color: #b0df
 .connector-actions { margin: 16px 0; padding: 12px 16px; border: 1px solid #354d3e; background: #121d16; border-radius: 8px; font-size: 12px; }
 .connector-actions label { display: grid; gap: 5px; color: #b8d2c2; }
 .connector-actions select { border: 1px solid #47604f; border-radius: 5px; background: #14261b; color: #d6eadf; padding: 8px; }
+.verification-label { display: block; color: #b8d8c3; margin: 8px 0; font-size: 10px; }
+.agent-trace { margin: 8px 0; font-size: 10px; color: #afc6b8; border-top: 1px solid #3a5041; padding-top: 7px; }
+.agent-trace p { margin: 5px 0; }
+.model-choice { font-size: 10px; color: #adc3b5; display: flex; gap: 6px; align-items: flex-start; margin-top: 10px; }
+.model-choice input { accent-color: #b0e4c0; }
 @media (max-width: 1100px) { .source-selector select { max-width: 180px; } .header-inner { gap: 14px; } }
 @media (max-width: 650px) {
   .header-inner { gap: 10px; }

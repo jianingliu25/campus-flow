@@ -83,6 +83,8 @@ def create_app(settings=None, database=None, provider_config=None):
     application.include_router(dashboard_router)
     from app.api.connectors import router as connector_router
     application.include_router(connector_router)
+    from app.api.chat import router as chat_router
+    application.include_router(chat_router)
     @application.get("/api/health")
     def health():
         return {"status": "ok", "milestone": "M4", "mode": "local-dashboard", "real_sources_enabled": False, "local_import_enabled": True}
