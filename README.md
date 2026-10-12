@@ -2,6 +2,9 @@
 
 Local-first campus email assistant, rebuilt as an open-source project.
 
+[Repository & ongoing share link](https://github.com/jianingliu25/campus-flow) ·
+[Automated checks](https://github.com/jianingliu25/campus-flow/actions/workflows/checks.yml)
+
 **Current status: M2 local foundation / fictional preview, not a complete assistant.**
 This is an early public checkpoint. Follow `main` for M3–M9 updates at the same repository URL.
 No account, API key, model weights, or real email is required. This preview reads only
