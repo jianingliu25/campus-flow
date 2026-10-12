@@ -90,9 +90,9 @@ class CredentialStore:
 
     def delete(self, ctx):
         with self.lock:
+            self.items.pop(self.key(ctx), None)
             if self.vault:
                 self.vault.delete(self.key(ctx))
-            self.items.pop(self.key(ctx), None)
 
     def clear_owner(self, session):
         with self.lock:

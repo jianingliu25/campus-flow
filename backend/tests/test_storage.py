@@ -25,7 +25,7 @@ def test_migration_matches_models_and_repeats(store):
         assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
         assert connection.scalar(text("PRAGMA foreign_keys")) == 1
         assert connection.scalar(text("PRAGMA journal_mode")) == "wal"
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0002"
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0003"
 
 
 def test_email_document_outbox_are_atomic_and_idempotent(store):

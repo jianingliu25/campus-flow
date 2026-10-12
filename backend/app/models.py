@@ -3,7 +3,7 @@
 from datetime import date, datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Integer, JSON, String, Text, UniqueConstraint, text
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Integer, JSON, String, Text, UniqueConstraint, Index, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.types import TypeDecorator
 
@@ -135,7 +135,7 @@ class Email(SourceOwned, Base):
 
 class CampusEvent(SourceOwned, Base):
     __tablename__ = "events"
-    __table_args__ = owned(ForeignKeyConstraint(["source_email_id", "source_id", "workspace_id"], ["emails.id", "emails.source_id", "emails.workspace_id"], ondelete="CASCADE"))
+    __table_args__ = owned(ForeignKeyConstraint(["source_email_id", "source_id", "workspace_id"], ["emails.id", "emails.source_id", "emails.workspace_id"], ondelete="CASCADE"), Index("ux_events_owner","id","source_id","workspace_id",unique=True))
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     title: Mapped[str] = mapped_column(Text)
     type: Mapped[str] = mapped_column(String(20))
@@ -152,6 +152,16 @@ class CampusEvent(SourceOwned, Base):
     evidence: Mapped[str | None] = mapped_column(Text)
     user_modified: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default=text("1"))
+
+
+class CalendarSelection(SourceOwned, Base):
+    __tablename__="calendar_selections"
+    __table_args__=owned(ForeignKeyConstraint(["event_id","source_id","workspace_id"],["events.id","events.source_id","events.workspace_id"],ondelete="CASCADE"),UniqueConstraint("event_id"))
+    id: Mapped[str]=mapped_column(String(36),primary_key=True,default=new_id)
+    event_id: Mapped[str]=mapped_column(String(36))
+    selected: Mapped[bool]=mapped_column(Boolean,default=False)
+    updated_at: Mapped[datetime]=mapped_column(UTCDateTime(),default=utcnow)
 
 
 class Profile(SourceOwned, Base):
@@ -229,3 +239,14 @@ class IndexOutbox(SourceOwned, Base):
     lease_until: Mapped[datetime | None] = mapped_column(UTCDateTime())
     error_code: Mapped[str | None] = mapped_column(String(40))
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+
+
+class LocalVector(SourceOwned,Base):
+    __tablename__="local_vectors"
+    __table_args__=owned(ForeignKeyConstraint(["document_id","source_id","workspace_id"],["vector_documents.id","vector_documents.source_id","vector_documents.workspace_id"],ondelete="CASCADE"),UniqueConstraint("document_id"))
+    id: Mapped[str]=mapped_column(String(36),primary_key=True,default=new_id)
+    document_id: Mapped[str]=mapped_column(String(36))
+    generation: Mapped[int]=mapped_column(Integer)
+    document_version: Mapped[int]=mapped_column(Integer)
+    embedding_version: Mapped[str]=mapped_column(String(100))
+    values: Mapped[list]=mapped_column(JSON)

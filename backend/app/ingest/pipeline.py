@@ -26,6 +26,8 @@ def save_candidates(session, ctx, mail, extraction, method, received, body, time
         key = str(uuid5(NAMESPACE_URL, f"{ctx.source_id}:{mail.id}:{position}"))
         event = session.scalar(owned_query(CampusEvent, ctx).where(CampusEvent.id == key))
         active_ids.add(key)
+        if event:
+            event.revision += 1
         if event and event.user_modified:
             event.source_changed = True
             continue
@@ -38,6 +40,7 @@ def save_candidates(session, ctx, mail, extraction, method, received, body, time
     for event in session.scalars(owned_query(CampusEvent, ctx).where(CampusEvent.source_email_id == mail.id)):
         if event.id not in active_ids:
             if event.user_modified:
+                event.revision += 1
                 event.source_changed = True
             else:
                 event.status = "superseded"
@@ -79,6 +82,7 @@ def import_one(database, ctx, parsed, mode, expected_policy_version, allowed_kin
             mail.extraction_status, mail.extraction_method = "not_processed", None
             for event in session.scalars(owned_query(CampusEvent, ctx).where(CampusEvent.source_email_id == mail.id)):
                 if event.user_modified:
+                    event.revision += 1
                     event.source_changed = True
                 else:
                     event.status = "superseded"

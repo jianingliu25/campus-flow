@@ -13,6 +13,7 @@ from app.config import get_settings
 from app.demo import demo_payload
 from app.llm.compatible import ProcessingGateway
 from app.models import QALog
+from app.profile.signals import safe_memory,record
 from app.security.http import local_session,source_context
 from app.security.policies import BoundaryError,scoped_policy,scoped_source
 from app.ingest.pipeline import source_timezone
@@ -48,11 +49,14 @@ async def chat(body:ChatRequest,request:Request,ctx=Depends(source_context)):
         source,policy=scoped_source(session,ctx),scoped_policy(session,ctx)
         if policy.version!=data.policy_version or source.index_generation!=data.generation:
             raise BoundaryError("POLICY_CHANGED_DURING_PROCESSING",409)
-        if policy.enable_qa_memory:
+        save_memory=policy.enable_qa_memory and safe_memory(body.query) and result["template_id"]!="unsafe_request"
+        if policy.enable_implicit_profile and safe_memory(body.query):
+            record(session,ctx,body.query)
+        if save_memory:
             session.add(QALog(workspace_id=ctx.workspace_id,source_id=ctx.source_id,question=body.query,answer=result["answer"],
                               template_id=result["template_id"][:80],quality_score=result["quality_score"],
                               safe_trajectory={"verification_status":result["verification_status"],"tool_calls":result["tool_calls"],"processing_mode":result["processing_mode"]}))
-    result["memory_saved"]=bool(policy.enable_qa_memory)
+    result["memory_saved"]=bool(save_memory)
     return result
 
 

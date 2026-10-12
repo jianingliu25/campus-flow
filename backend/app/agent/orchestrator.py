@@ -42,7 +42,7 @@ def decompose(intents,params):
         if intent=="daily_summary":
             today=params["today"];base.update(start_day=today,end_day=today+timedelta(days=1),keyword="")
         if intent=="deadlines":base["type"]="deadline"
-        if intent=="recommendations":base["type"]="activity"
+        if intent=="recommendations":base.update(type="activity",include_candidates=True)
         if intent=="important_emails":tasks.append(Task(prefix+"mail","get_important_emails",base));continue
         tasks.append(Task(prefix+"events","get_events",base))
         if intent in {"calendar_conflict_check","find_free_time","multi_step_planning"}:
@@ -92,7 +92,8 @@ def compose(data,results):
             for mail in value:claims.append({"kind":"mail","task":id,"id":mail["id"],"subject":mail["subject"]});citations.add(mail["id"])
         elif tool=="check_conflicts":
             if value["pairs"]:
-                sections.append("有冲突：\n"+"\n".join(f"• {pair['start'].astimezone(ZoneInfo(data.timezone)).strftime('%Y-%m-%d %H:%M')}–{pair['end'].astimezone(ZoneInfo(data.timezone)).strftime('%H:%M')} 重叠" for pair in value["pairs"]))
+                sections.append("有冲突：\n"+"\n".join(f"• {pair['start'].astimezone(ZoneInfo(data.timezone)).strftime('%Y-%m-%d %H:%M')}–{pair['end'].astimezone(ZoneInfo(data.timezone)).strftime('%H:%M')} 重叠" for pair in value["pairs"][:100]))
+                if len(value["pairs"])>100:sections.append("冲突超过展示上限，仅列出前 100 对。");degraded=True
             elif value["state"]=="insufficient_data":sections.append("已知完整时段未发现重叠；存在时间不明的通知，无法完整确定是否有冲突。");degraded=True
             else:sections.append("明确的本地日程区间中没有冲突；单点截止不作为占用区间。")
         elif tool=="find_free_slots":

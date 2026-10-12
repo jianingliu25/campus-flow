@@ -43,6 +43,8 @@ def create_app(settings=None, database=None, provider_config=None):
             vault=None
         application.state.credentials=CredentialStore(vault)
         application.state.sync=SyncManager(store,application.state.credentials)
+        from app.memory.vector_store import VectorStore
+        application.state.vectors=VectorStore(store)
         async def expire_previews():
             while True:
                 await asyncio.sleep(30)
@@ -61,7 +63,7 @@ def create_app(settings=None, database=None, provider_config=None):
             if owned_db:
                 store.close()
 
-    application = FastAPI(title="Campus Flow — M4 dashboard", version="0.4.0", lifespan=lifespan)
+    application = FastAPI(title="Campus Flow — offline beta", version="0.9.0", lifespan=lifespan)
     application.add_middleware(LocalBoundaryMiddleware)
     application.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "[::1]"])
 
@@ -85,9 +87,13 @@ def create_app(settings=None, database=None, provider_config=None):
     application.include_router(connector_router)
     from app.api.chat import router as chat_router
     application.include_router(chat_router)
+    from app.api.personal import router as personal_router
+    application.include_router(personal_router)
+    from app.api.data_management import router as data_router
+    application.include_router(data_router)
     @application.get("/api/health")
     def health():
-        return {"status": "ok", "milestone": "M4", "mode": "local-dashboard", "real_sources_enabled": False, "local_import_enabled": True}
+        return {"status": "ok", "milestone": "M9-offline", "mode": "local-first", "real_sources_enabled": True, "live_account_validated": False, "local_import_enabled": True}
 
     @application.get("/api/demo")
     def demo():

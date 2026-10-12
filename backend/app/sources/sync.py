@@ -65,6 +65,7 @@ class SyncManager:
         try:
             secret=self.credentials.get(ctx,local_session,storage)
             reader=self.factory(kind,config,secret)
+            reader.guard=lambda:self.check(ctx,run_id,version,generation)
             with self.db.transaction() as session:
                 saved=session.scalar(owned_query(SyncCursor,ctx).where(SyncCursor.folder==key))
                 cursor=dict(saved.cursor) if saved and saved.cursor.get("policy_version")==version else {}

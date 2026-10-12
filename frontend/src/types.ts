@@ -12,7 +12,7 @@ export interface Event {
   start_at: string | null; end_at: string | null; date: string | null; all_day: boolean
   location: string | null; status: 'confirmed' | 'needs_confirmation' | 'superseded'
   evidence: string; capacity_remaining: number | null; supersedes_event_id: string | null
-  source_changed?: boolean; user_modified?: boolean
+  source_changed?: boolean; user_modified?: boolean; revision?: number; in_calendar?: boolean
 }
 
 export interface Source { id: string; kind: string; display_name: string; timezone: string | null; status: string }

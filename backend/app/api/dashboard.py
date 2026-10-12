@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import func, select
 
 from app.api.foundation import db
+from app.calendar import selections,included
 from app.ingest.pipeline import source_timezone
 from app.models import CampusEvent, Email, IndexOutbox, utcnow
 from app.security.http import local_session, source_context
@@ -42,6 +43,7 @@ def dashboard(request: Request, mail_offset: int = Query(default=0, ge=0, le=100
         source = scoped_source(transaction, ctx)
         zone = source_timezone(transaction, ctx)
         today = utcnow().astimezone(ZoneInfo(zone)).date()
+        selected=selections(transaction,ctx)
         page_size = 50
         mails = list(transaction.scalars(owned_query(Email, ctx).order_by(Email.sorting_timestamp.desc(), Email.id)
                                          .offset(mail_offset).limit(page_size)))
@@ -53,12 +55,13 @@ def dashboard(request: Request, mail_offset: int = Query(default=0, ge=0, le=100
         event_total = transaction.scalar(select(func.count()).select_from(event_query.subquery()))
         today_count = deadlines = pending = 0
         # Totals read scalar fields only; the response omits body_text (excerpts may contain mail content).
-        for status, kind, stamp, day in transaction.execute(event_query.with_only_columns(
-                CampusEvent.status, CampusEvent.type, CampusEvent.start_at_utc, CampusEvent.event_date)):
+        for event_id, modified, status, kind, stamp, day in transaction.execute(event_query.with_only_columns(
+                CampusEvent.id, CampusEvent.user_modified, CampusEvent.status, CampusEvent.type, CampusEvent.start_at_utc, CampusEvent.event_date)):
             if status == "needs_confirmation":
                 pending += 1
             local_day = stamp.astimezone(ZoneInfo(zone)).date() if stamp else day
-            if status == "confirmed" and local_day:
+            member=selected.get(event_id,kind!="activity" or modified)
+            if member and status == "confirmed" and local_day:
                 today_count += int(local_day == today)
                 deadlines += int(kind == "deadline" and today <= local_day < today + timedelta(days=7))
         counts = dict(transaction.execute(select(IndexOutbox.status, func.count()).where(
@@ -69,7 +72,7 @@ def dashboard(request: Request, mail_offset: int = Query(default=0, ge=0, le=100
             "source_id": source.id, "timezone": zone, "today": today, "page_size": page_size,
             "mail_total": mail_total, "event_total": event_total, "mail_offset": mail_offset, "event_offset": event_offset,
             "stats": {"today_events": today_count, "upcoming_deadlines": deadlines, "needs_confirmation": pending},
-            "processing": {"last_import_at": last_import, "index_jobs": counts, "vector_search_enabled": False,
+            "processing": {"last_import_at": last_import, "index_jobs": counts, "vector_search_enabled": True, "retrieval_mode":"local-lexical",
                            "account_connected":bool(source.safe_config.get("connection_tested")),
                            "sync_paused":bool(source.safe_config.get("paused"))},
             "emails": [{"id": mail.id, "source_id": mail.source_id, "subject": mail.subject, "sender": mail.sender,
@@ -81,5 +84,5 @@ def dashboard(request: Request, mail_offset: int = Query(default=0, ge=0, le=100
                         "end_at": event.end_at_utc, "date": event.event_date or event.deadline_date,
                         "all_day": event.all_day, "location": event.location, "status": event.status,
                         "source_changed": event.source_changed, "evidence": event.evidence,
-                        "user_modified": event.user_modified} for event in events],
+                        "revision":event.revision,"in_calendar":included(event,selected),"user_modified": event.user_modified} for event in events],
         }

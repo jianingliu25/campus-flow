@@ -54,7 +54,7 @@ def session_info(request, session):
             "active_source_id": session.active_source_id, "ttl_seconds": int(max(0, session.expires_at - request.app.state.sessions.clock())),
             "provider_mode": config.mode, "provider_fingerprint": config.fingerprint,
             "remote_globally_enabled": config.global_remote, "workspace_timezone": request.app.state.timezone,
-            "milestone": "M4"}
+            "milestone": "M9-offline"}
 
 
 @router.post("/session")
@@ -233,4 +233,4 @@ def index_status(request: Request, ctx=Depends(source_context)):
         scoped_source(transaction, ctx)
         counts = transaction.execute(select(IndexOutbox.status, func.count()).where(
             IndexOutbox.workspace_id == ctx.workspace_id, IndexOutbox.source_id == ctx.source_id).group_by(IndexOutbox.status)).all()
-        return {"source_id": ctx.source_id, "jobs": dict(counts), "worker_auto_start": False, "vector_search_enabled": False}
+        return {"source_id": ctx.source_id, "jobs": dict(counts), "worker_auto_start": False, "vector_search_enabled": True, "retrieval_mode":"local-lexical"}

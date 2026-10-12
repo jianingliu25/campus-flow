@@ -30,17 +30,23 @@ class IndexWriter(Protocol):
 
 
 class IndexWorker:
-    def __init__(self, database, writer: IndexWriter, lease_seconds=60, max_attempts=3, clock=utcnow):
+    def __init__(self, database, writer: IndexWriter, lease_seconds=60, max_attempts=3, clock=utcnow, ctx=None):
         self.database, self.writer = database, writer
         self.lease_seconds, self.max_attempts, self.clock = lease_seconds, max_attempts, clock
+        self.ctx=ctx
 
     def claim(self):
         now, token = self.clock(), new_id()
         eligible = or_(and_(IndexOutbox.status == "pending", IndexOutbox.available_at <= now),
                        and_(IndexOutbox.status == "processing", IndexOutbox.lease_until <= now))
+        if self.ctx:
+            eligible=and_(eligible,IndexOutbox.source_id==self.ctx.source_id,IndexOutbox.workspace_id==self.ctx.workspace_id)
         candidate = select(IndexOutbox.id).where(eligible, IndexOutbox.attempts < self.max_attempts).order_by(IndexOutbox.created_at, IndexOutbox.id).limit(1).scalar_subquery()
         with self.database.transaction() as session:
-            session.execute(update(IndexOutbox).where(IndexOutbox.status == "processing", IndexOutbox.lease_until <= now, IndexOutbox.attempts >= self.max_attempts).values(status="dead", error_code="LEASE_EXHAUSTED", lease_token=None, lease_until=None))
+            exhausted = update(IndexOutbox).where(IndexOutbox.status == "processing", IndexOutbox.lease_until <= now, IndexOutbox.attempts >= self.max_attempts)
+            if self.ctx:
+                exhausted = exhausted.where(IndexOutbox.source_id == self.ctx.source_id, IndexOutbox.workspace_id == self.ctx.workspace_id)
+            session.execute(exhausted.values(status="dead", error_code="LEASE_EXHAUSTED", lease_token=None, lease_until=None))
             id = session.scalar(update(IndexOutbox).where(IndexOutbox.id == candidate).values(
                 status="processing", lease_token=token, lease_until=now + timedelta(seconds=self.lease_seconds), attempts=IndexOutbox.attempts + 1).returning(IndexOutbox.id))
             if id is None:

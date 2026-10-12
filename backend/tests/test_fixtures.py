@@ -56,7 +56,7 @@ def test_demo_ignores_cloud_credentials_and_is_read_only(monkeypatch, tmp_path):
     monkeypatch.setenv("ALLOW_REMOTE_PROCESSING", "true")
     monkeypatch.setenv("DEMO_REFERENCE_DATE", "2026-10-12")
     client = TestClient(app, base_url="http://127.0.0.1")
-    assert client.get("/api/health").json()["real_sources_enabled"] is False
+    assert client.get("/api/health").json()["live_account_validated"] is False
     payload = client.get("/api/demo").json()
     assert payload["meta"]["provider"] == "FixtureProvider"
     assert payload["meta"]["remote_processing"] is False

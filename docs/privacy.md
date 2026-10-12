@@ -47,3 +47,21 @@ cloud consent. Opening settings or using assistant shortcuts makes no model call
 Private mail, chat and source selection are not stored in browser localStorage or
 sessionStorage. This does not imply encryption or retroactive content deletion.
 See [M4](milestones/M4.md) for pagination scope and current limitations.
+
+## Offline beta update (M5–M9)
+
+IMAP/MCP configuration and sync are explicit manual actions. Session credentials
+expire or optionally use the Windows vault. Disconnect does not revoke provider
+credentials: do that at the provider. Actual account acceptance has not been run.
+
+QA history and fixed-topic implicit interests require separate opt-ins. Disable
+stops new records; use data management to clear retained history or interest signals.
+Suggestions need acceptance. Cloud contact masking is best-effort and cannot remove
+all identifying names or context. Provider-specific consent is still required.
+
+Local lexical vectors persist in the private database and are fenced by source and
+version. No model is downloaded automatically. Export is private JSON downloaded to
+this computer. Deletion includes manually edited events and all derived records;
+export first if needed. It blocks late writes, attempts WAL truncation and compaction,
+and honestly reports pending maintenance. It cannot wipe provider mail, backups or
+SSD remnants. See [M7](milestones/M7.md) for exact behavior.

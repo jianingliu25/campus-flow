@@ -32,6 +32,11 @@ def test_six_product_templates(query,intent):
     assert result["tool_calls"]<=12
 
 
+def test_deadline_shortcut_does_not_search_for_literal_ddl():
+    result = answer("本周 DDL")
+    assert result['event_ids'] and '具体时刻未知' in result['answer']
+
+
 def test_conflicts_depend_on_event_result_and_half_open_intervals():
     result=answer("明天有冲突吗？")
     assert "有冲突" in result["answer"] and "14:30–15:00" in result["answer"]

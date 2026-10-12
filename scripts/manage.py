@@ -71,7 +71,7 @@ print(f'Validated {len(bundle.emails)} fictional emails, {len(bundle.events)} ev
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["setup", "build", "validate", "test", "demo", "migrate", "db-status", "import", "mcp-demo"])
+    parser.add_argument("command", choices=["setup", "build", "validate", "test", "demo", "migrate", "db-status", "import", "mcp-demo", "evaluate"])
     parser.add_argument("--file")
     parser.add_argument("--directory")
     parser.add_argument("--source-id")
@@ -105,6 +105,8 @@ def main():
                 if args.dry_run:
                     command += ["--dry-run"]
                 run(command, cwd=ROOT / "backend")
+            elif args.command == "evaluate":
+                run([PYTHON, ROOT / "scripts/evaluate.py"])
             elif args.command == "test":
                 run([PYTHON, "-m", "pytest"], cwd=ROOT / "backend")
                 build()
@@ -122,7 +124,7 @@ try:
         print('Schema revision:', connection.scalar(text('SELECT version_num FROM alembic_version')))
         print('Application tables:', len(inspect(connection).get_table_names()) - 1)
         print('Foreign keys:', bool(connection.scalar(text('PRAGMA foreign_keys'))))
-        print('Real connectors: disabled; index worker: manual/not started')
+        print('Connectors: explicit configuration and manual sync; indexing: manual')
 finally:
     db.close()
 """

@@ -19,3 +19,12 @@
 - Recorded privacy boundaries, original-source audit and milestone acceptance.
 
 No public GitHub release, real-source connector, production storage or model inference.
+
+## v0.9.0-offline-beta — 2026-10-13
+
+- Read-only IMAP and constrained HTTP MCP, session/Windows-vault credentials and manual sync.
+- Six-stage source-wide agent with hard fact verification, dependencies and bounded replanning.
+- Calendar revisions and activity membership, explicit interests, opt-in fixed-topic suggestions/history.
+- Durable scoped lexical vectors and manual index/search/rebuild; private export and deletion barriers.
+- Frozen 40-question offline intent evaluation, published failures and conservative extraction metrics.
+- 101 backend checks and frontend type checking/build. Real mailbox and learned semantics unvalidated.

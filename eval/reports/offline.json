@@ -1,0 +1,337 @@
+{
+  "reference_now": "2026-10-12T09:00:00+08:00",
+  "mode": "offline-rules-and-lexical",
+  "holdout_provenance": {
+    "frozen_on": "2026-10-13",
+    "count": 40,
+    "sha256": "d57f4a3c3ab42ab3b87ea83914d9f403d671cdb0a6851ca634f90df42ed4f075",
+    "authored_after_implementation": true,
+    "independent_external_benchmark": false,
+    "no_post_evaluation_tuning": true
+  },
+  "intent": {
+    "accuracy": 0.975,
+    "macro_f1": 0.979020979020979,
+    "per_label": {
+      "calendar_conflict_check": {
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "f1": 0.9090909090909091
+      },
+      "calendar_simple_query": {
+        "precision": 0.8571428571428571,
+        "recall": 1.0,
+        "f1": 0.923076923076923
+      },
+      "daily_summary": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "email_calendar_combined": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "find_free_time": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "multi_step_planning": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "simple": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "unsafe_request": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    },
+    "predictions": [
+      {
+        "id": "h01",
+        "query": "下周的日程是否重叠？",
+        "intent": "calendar_conflict_check",
+        "predicted": "calendar_conflict_check"
+      },
+      {
+        "id": "h02",
+        "query": "周三课程冲突情况",
+        "intent": "calendar_conflict_check",
+        "predicted": "calendar_conflict_check"
+      },
+      {
+        "id": "h03",
+        "query": "检查 2026-10-15 的时间冲突",
+        "intent": "calendar_conflict_check",
+        "predicted": "calendar_conflict_check"
+      },
+      {
+        "id": "h04",
+        "query": "这周两场讲座重叠了吗",
+        "intent": "calendar_conflict_check",
+        "predicted": "calendar_conflict_check"
+      },
+      {
+        "id": "h05",
+        "query": "明天的安排会撞期吗",
+        "intent": "calendar_conflict_check",
+        "predicted": "calendar_simple_query"
+      },
+      {
+        "id": "h06",
+        "query": "2026-10-13 有没有时间重叠",
+        "intent": "calendar_conflict_check",
+        "predicted": "calendar_conflict_check"
+      },
+      {
+        "id": "h07",
+        "query": "查找机器学习的通知",
+        "intent": "email_calendar_combined",
+        "predicted": "email_calendar_combined"
+      },
+      {
+        "id": "h08",
+        "query": "摄影活动的邮件在哪",
+        "intent": "email_calendar_combined",
+        "predicted": "email_calendar_combined"
+      },
+      {
+        "id": "h09",
+        "query": "奖学金通知有哪些",
+        "intent": "email_calendar_combined",
+        "predicted": "email_calendar_combined"
+      },
+      {
+        "id": "h10",
+        "query": "跨日实验相关邮件",
+        "intent": "email_calendar_combined",
+        "predicted": "email_calendar_combined"
+      },
+      {
+        "id": "h11",
+        "query": "给我宿舍维修的原邮件",
+        "intent": "email_calendar_combined",
+        "predicted": "email_calendar_combined"
+      },
+      {
+        "id": "h12",
+        "query": "NLP 截止变更通知是什么",
+        "intent": "email_calendar_combined",
+        "predicted": "email_calendar_combined"
+      },
+      {
+        "id": "h13",
+        "query": "后天 09:00–17:00 有空吗",
+        "intent": "find_free_time",
+        "predicted": "find_free_time"
+      },
+      {
+        "id": "h14",
+        "query": "周五 13:00–18:00 找一个空档",
+        "intent": "find_free_time",
+        "predicted": "find_free_time"
+      },
+      {
+        "id": "h15",
+        "query": "下周一的空闲时间",
+        "intent": "find_free_time",
+        "predicted": "find_free_time"
+      },
+      {
+        "id": "h16",
+        "query": "2026-10-15 10:00–12:00 有空余吗",
+        "intent": "find_free_time",
+        "predicted": "find_free_time"
+      },
+      {
+        "id": "h17",
+        "query": "周三晚上空闲吗",
+        "intent": "find_free_time",
+        "predicted": "find_free_time"
+      },
+      {
+        "id": "h18",
+        "query": "明天找45分钟空档",
+        "intent": "find_free_time",
+        "predicted": "find_free_time"
+      },
+      {
+        "id": "h19",
+        "query": "今天的摘要",
+        "intent": "daily_summary",
+        "predicted": "daily_summary"
+      },
+      {
+        "id": "h20",
+        "query": "今天安排了什么",
+        "intent": "daily_summary",
+        "predicted": "daily_summary"
+      },
+      {
+        "id": "h21",
+        "query": "每日摘要",
+        "intent": "daily_summary",
+        "predicted": "daily_summary"
+      },
+      {
+        "id": "h22",
+        "query": "请列出今天安排",
+        "intent": "daily_summary",
+        "predicted": "daily_summary"
+      },
+      {
+        "id": "h23",
+        "query": "今天的安排与待办",
+        "intent": "daily_summary",
+        "predicted": "daily_summary"
+      },
+      {
+        "id": "h24",
+        "query": "给我今天的日程摘要",
+        "intent": "daily_summary",
+        "predicted": "daily_summary"
+      },
+      {
+        "id": "h25",
+        "query": "为论文阅读准备时间",
+        "intent": "multi_step_planning",
+        "predicted": "multi_step_planning"
+      },
+      {
+        "id": "h26",
+        "query": "安排下周学习计划",
+        "intent": "multi_step_planning",
+        "predicted": "multi_step_planning"
+      },
+      {
+        "id": "h27",
+        "query": "帮我规划开源项目",
+        "intent": "multi_step_planning",
+        "predicted": "multi_step_planning"
+      },
+      {
+        "id": "h28",
+        "query": "为篮球比赛做准备",
+        "intent": "multi_step_planning",
+        "predicted": "multi_step_planning"
+      },
+      {
+        "id": "h29",
+        "query": "我需要制定本周计划",
+        "intent": "multi_step_planning",
+        "predicted": "multi_step_planning"
+      },
+      {
+        "id": "h30",
+        "query": "规划 NLP 项目准备",
+        "intent": "multi_step_planning",
+        "predicted": "multi_step_planning"
+      },
+      {
+        "id": "h31",
+        "query": "周一有哪些课程",
+        "intent": "calendar_simple_query",
+        "predicted": "calendar_simple_query"
+      },
+      {
+        "id": "h32",
+        "query": "查询摄影活动日期",
+        "intent": "calendar_simple_query",
+        "predicted": "calendar_simple_query"
+      },
+      {
+        "id": "h33",
+        "query": "国际讲座几点开始",
+        "intent": "calendar_simple_query",
+        "predicted": "calendar_simple_query"
+      },
+      {
+        "id": "h34",
+        "query": "NLP 项目截止在哪一天",
+        "intent": "calendar_simple_query",
+        "predicted": "calendar_simple_query"
+      },
+      {
+        "id": "h35",
+        "query": "下次会议是哪天",
+        "intent": "calendar_simple_query",
+        "predicted": "calendar_simple_query"
+      },
+      {
+        "id": "h36",
+        "query": "展示本周日程",
+        "intent": "calendar_simple_query",
+        "predicted": "calendar_simple_query"
+      },
+      {
+        "id": "h37",
+        "query": "你好",
+        "intent": "simple",
+        "predicted": "simple"
+      },
+      {
+        "id": "h38",
+        "query": "谢谢",
+        "intent": "simple",
+        "predicted": "simple"
+      },
+      {
+        "id": "h39",
+        "query": "请发送邮件给老师",
+        "intent": "unsafe_request",
+        "predicted": "unsafe_request"
+      },
+      {
+        "id": "h40",
+        "query": "删除邮件",
+        "intent": "unsafe_request",
+        "predicted": "unsafe_request"
+      }
+    ]
+  },
+  "development_extraction": {
+    "emails": 30,
+    "classification_accuracy": 0.7,
+    "exact_field_precision": 0.5576923076923077,
+    "exact_field_recall": 0.27102803738317754,
+    "exact_field_f1": 0.3647798742138365,
+    "matched_fields": 29,
+    "predicted_fields": 52,
+    "gold_fields": 107,
+    "limitation": "Development corpus, per-email ordered matching; timezone representations are exact, not normalized semantic equivalence."
+  },
+  "citation_reference_validity": {
+    "valid": 286,
+    "total": 286,
+    "answer_accuracy_measured": false
+  },
+  "repair_fault_injection": [
+    {
+      "max_replans": 0,
+      "verification": "failed",
+      "tool_calls": 2
+    },
+    {
+      "max_replans": 2,
+      "verification": "passed",
+      "tool_calls": 4
+    }
+  ],
+  "not_validated": [
+    "real mailbox",
+    "vendor MCP schema adapters",
+    "learned model quality",
+    "semantic recommendation precision@5",
+    "FAISS runtime",
+    "external benchmark generalization",
+    "human graded answer correctness"
+  ]
+}

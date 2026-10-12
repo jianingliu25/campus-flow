@@ -21,8 +21,10 @@ class MCPAdapter:
         self.serial=0
         self.version="2025-11-25"
         self.tools={}
+        self.guard=lambda:None
 
     async def rpc(self,method,params=None,notification=False):
+        self.guard()
         self.serial+=1
         message={"jsonrpc":"2.0","method":method,"params":params or {}}
         if not notification:

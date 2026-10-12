@@ -36,6 +36,7 @@ def events(data,params):
     zone=ZoneInfo(data.timezone);start,end=params.get("start_day"),params.get("end_day")
     result=[]
     for event in data.events:
+        if not event.get("in_calendar",True) and not params.get("include_candidates"):continue
         if params.get("type") and event["type"]!=params["type"]:continue
         if params.get("keyword") and similarity(params["keyword"],event["title"]+" "+event.get("evidence",""))<=0:continue
         day=day_of(event,zone)

@@ -6,6 +6,7 @@ from sqlalchemy import select,func
 
 from app.ingest.pipeline import source_timezone
 from app.models import CampusEvent,Email
+from app.calendar import selections,included
 from app.security.policies import scoped_policy,scoped_source
 from app.storage import owned_query
 
@@ -32,8 +33,9 @@ class Snapshot:
             emails=[{"id":row[0],"source_id":row[1],"subject":row[2],"sender":row[3],"summary":row[4] or "",
                      "body_excerpt":row[5] or "","local_star":row[6],"category":row[7],"received_at":row[8]} for row in rows[:5000]]
             values=list(session.scalars(owned_query(CampusEvent,ctx).where(CampusEvent.status!="superseded").order_by(CampusEvent.created_at,CampusEvent.id).limit(5001)))
+            selected=selections(session,ctx)
             events=[{"id":item.id,"source_id":item.source_id,"source_email_id":item.source_email_id,"title":item.title,
-                     "type":item.type,"start_at":item.start_at_utc,"end_at":item.end_at_utc,"date":item.event_date or item.deadline_date,
+                     "in_calendar":included(item,selected),"type":item.type,"start_at":item.start_at_utc,"end_at":item.end_at_utc,"date":item.event_date or item.deadline_date,
                      "all_day":item.all_day,"location":item.location,"status":item.status,"evidence":item.evidence or ""} for item in values[:5000]]
             return cls(source.id,zone,now or datetime.now(timezone.utc),emails,events,policy.version,source.index_generation,len(rows)>5000 or len(values)>5000)
 

@@ -37,8 +37,10 @@ class IMAPAdapter:
     def __init__(self, config, secret, factory=None):
         self.config, self.secret, self.factory = config, secret, factory
         self.client = None
+        self.guard = lambda: None
 
     def connect(self):
+        self.guard()
         if self.factory:
             self.client = self.factory()
         else:
@@ -68,6 +70,7 @@ class IMAPAdapter:
     def select(self, folder):
         if not re.fullmatch(r"[A-Za-z0-9 /_.&+\-]{1,120}",folder):
             raise BoundaryError("UNSUPPORTED_IMAP_FOLDER",422)
+        self.guard()
         kind, _ = self.client.select('"'+folder+'"',readonly=True)
         if kind != "OK":
             raise BoundaryError("MAILBOX_UNAVAILABLE",403)
@@ -96,6 +99,7 @@ class IMAPAdapter:
         epoch = self.select(folder)
         uid = cursor.get("uid",0) if cursor.get("uidvalidity")==epoch else 0
         since = (utcnow()-timedelta(days=scope["recent_days"])).strftime("%d-%b-%Y")
+        self.guard()
         kind, result = self.client.uid("SEARCH",None,"SINCE",since,"UID",f"{uid+1}:*")
         if kind!="OK" or not result or not isinstance(result[0],bytes) or len(result[0])>1024*1024:
             raise BoundaryError("IMAP_SEARCH_INVALID",502)
@@ -103,6 +107,7 @@ class IMAPAdapter:
         identifiers = sorted({int(value) for value in result[0].split() if value.isdigit() and int(value)>uid})[:limit]
         mails, errors = [], []
         for identifier in identifiers:
+            self.guard()
             kind, sizes = self.client.uid("FETCH",str(identifier),"(RFC822.SIZE)")
             size_bytes = b" ".join(value for value in sizes if isinstance(value,bytes))
             size_match = re.search(rb"RFC822.SIZE (\d+)",size_bytes)
@@ -111,6 +116,7 @@ class IMAPAdapter:
             if int(size_match[1])>MAX_MESSAGE:
                 errors.append("MESSAGE_TOO_LARGE")
                 continue
+            self.guard()
             kind, values = self.client.uid("FETCH",str(identifier),"(UID BODY.PEEK[])")
             parts = [value for value in values if isinstance(value,tuple) and len(value)==2 and isinstance(value[1],bytes)]
             if kind!="OK" or len(parts)!=1:

@@ -143,7 +143,11 @@ class ProcessingGateway:
             raise BoundaryError("USE_LOCAL_EMBEDDING_GATEWAY")
         if self.config.mode != "fixture":
             normalize_endpoint(self.config)
-        answer = await self.factory(self.config).chat(messages, json_mode=json_mode)
+        from app.security.redaction import mask,restore
+        prepared,mapping=mask(messages) if self.config.mode=="cloud" else (messages,{})
+        answer = await self.factory(self.config).chat(prepared, json_mode=json_mode)
+        if mapping:
+            answer=restore(answer,mapping)
         with self.database.transaction() as session:
             if self.check(session, ctx, purpose) != version:
                 raise BoundaryError("POLICY_CHANGED_DURING_PROCESSING", 409)
