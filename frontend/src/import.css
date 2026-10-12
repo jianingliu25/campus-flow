@@ -1,0 +1,24 @@
+.local-import { border: 1px solid #344a3b; border-radius: 8px; margin-top: 16px; background: #121a15; }
+.local-import summary { cursor: pointer; padding: 15px 18px; font-size: 13px; color: #c9e3d2; }
+.local-import summary span { font-size: 10px; color: #9cafa3; margin-left: 12px; }
+.import-content { padding: 0 18px 18px; font-size: 12px; }
+.import-description { color: #a3b3a9; line-height: 1.9; margin: 14px 0; }
+.import-toolbar { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+.import-toolbar label, .extraction-choice { display: grid; gap: 6px; font-size: 11px; color: #b7c9bd; }
+.import-toolbar select, .import-toolbar input:not([type=file]), .extraction-choice select { background: #0f1712; color: #e1ebe5; padding: 9px; border: 1px solid #425a49; border-radius: 5px; max-width: 280px; }
+.import-content button { border: 1px solid #496152; background: #22382a; color: #d7eadc; padding: 8px 11px; border-radius: 5px; font-size: 11px; }
+.import-toolbar a { color: #b0e4c0; padding: 8px; text-decoration: underline; }
+.file-pick input { max-width: 300px; font-size: 11px; }
+.import-preview, .import-detail { padding: 15px; margin: 15px 0; background: #17221a; border: 1px solid #3a5041; border-radius: 7px; }
+.import-content h3 { font-size: 13px; margin: 0 0 10px; }
+.import-mail-scroll { max-height: 230px; overflow-y: auto; margin: 12px 0; }
+.preview-row { display: flex; gap: 12px; align-items: center; border-top: 1px solid #2c4233; padding: 12px 0; }
+.preview-row b { font-size: 12px; font-weight: 500; }
+.preview-row small, .import-results small { display: block; color: #a2b7aa; font-size: 10px; margin: 4px 0; }
+.import-results { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+.import-results > div { max-height: 400px; overflow-y: auto; }
+.import-results article { padding: 12px; border: 1px solid #35483c; border-radius: 5px; margin: 8px 0; }
+.import-content .import-mail-title { background: none; border: 0; padding: 0; text-align: left; font-size: 12px; }
+.import-detail p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.9; }
+.import-notice { background: #233e2c; padding: 12px; border-radius: 6px; }
+@media (max-width: 650px) { .import-results { grid-template-columns: 1fr; } .import-toolbar label { width: 100%; } .import-toolbar input, .import-toolbar select { width: 100%; max-width: 100%; } }

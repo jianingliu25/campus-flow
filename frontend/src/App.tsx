@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { establishSession, getDemo } from './api/client'
 import { labels, quickActions } from './i18n'
 import type { Category, Demo, Email, Event, EventType } from './types'
+import LocalImport from './LocalImport'
 
 function Icon({ kind }: { kind: 'calendar' | 'mail' | 'chat' | 'book' | 'settings' | 'arrow' }) {
   const paths = {
@@ -131,7 +132,8 @@ export default function App() {
     </div></header>
     <main id="home">
       <section className="welcome"><div><p className="eyebrow">YOUR CAMPUS, IN ONE PLACE</p><h1>欢迎回来<span className="wave" aria-hidden="true">✦</span></h1><p className="welcome-subtitle">把重要的事，留在眼前。</p></div><div className="date-display"><span>{demo?.meta.demo_date ?? '正在准备演示'}</span><small>{demo?.meta.timezone ?? 'Asia/Shanghai'}</small></div></section>
-      <div className="demo-banner"><span className="banner-tag">M2 · DEMO</span><p>全量虚构数据 · 未连接邮箱 · 无需 API Key · 不发送到云端</p><button onClick={() => setShowSettings(true)}>了解演示范围 <span aria-hidden="true">↗</span></button></div>
+      <div className="demo-banner"><span className="banner-tag">M3 · DEMO</span><p>全量虚构数据 · 未连接邮箱 · 无需 API Key · 不发送到云端</p><button onClick={() => setShowSettings(true)}>了解演示范围 <span aria-hidden="true">↗</span></button></div>
+      <LocalImport />
       {error ? <div role="alert" className="load-state"><h2>暂时无法加载演示</h2><p>{error}。请检查本地服务是否启动。</p><button onClick={() => setRetry(value => value + 1)}>重新加载</button></div> : !demo ? <div role="status" className="load-state">正在加载虚构校园数据…</div> : <>
         <div className="overview-strip"><span><b>{demo.stats.today_events}</b> 今日安排</span><span><b>{demo.stats.upcoming_deadlines}</b> 未来 7 天 DDL</span><span><b>{demo.emails.length}</b> 虚构邮件</span><span><b>{demo.stats.needs_confirmation}</b> 待确认时间</span></div>
         <div className="dashboard-grid">
@@ -149,8 +151,8 @@ export default function App() {
         </div>
         <section className="recommendations" aria-labelledby="recommendation-title"><div className="recommendation-heading"><div><p className="eyebrow">EXPLORE SOMETHING NEW</p><h2 id="recommendation-title">推荐活动 <span className="subtle">虚构活动预览</span></h2></div><span className="recommendation-note">预置列表，个性化推荐将在 M7 接入</span></div><div className="recommendation-list">{demo.recommendations.map((event, index) => <article key={event.id} className="rec-card"><span className="rec-number">{String(index + 1).padStart(2, '0')}</span><div className="rec-body"><h3>{event.title}</h3><p>{eventDay(event, demo.meta.timezone)} · {eventTime(event, demo.meta.timezone)} · {event.location}</p>{event.capacity_remaining !== null && <small>通知发布时剩余 {event.capacity_remaining} 个名额 · 非实时信息</small>}</div><button className="rec-link" onClick={() => openEmail(event.source_email_id)}>查看通知 <Icon kind="arrow" /></button></article>)}</div></section>
       </>}
-      <footer><span>CampusFlow <span className="subtle">/ 开源重建</span></span><span>M2 · FixtureProvider · 所有内容均为虚构</span></footer>
+      <footer><span>CampusFlow <span className="subtle">/ 开源重建</span></span><span>M3 · 下方演示为虚构数据</span></footer>
     </main>
-    <dialog ref={dialog} onCancel={closeDialog} onClose={closeDialog} aria-labelledby="dialog-title"><div className="dialog-header"><h2 id="dialog-title">{selectedMail ? '虚构邮件详情' : '演示与隐私'}</h2><button autoFocus onClick={closeDialog} aria-label="关闭">×</button></div>{selectedMail ? <div className="dialog-content"><span className="tiny-label">FICTIONAL · {selectedMail.id}</span><h3>{selectedMail.subject}</h3><p className="subtle">{selectedMail.sender_name} &lt;{selectedMail.sender}&gt;</p><p className="mail-body">{selectedMail.body_text}</p><p className="dialog-note">这是一封人工构造的虚构邮件，不来自真实邮箱。</p></div> : <div className="dialog-content"><p className="settings-lead">先体验，再连接。</p><p>当前为 M2 的虚构演示。本机会话、来源隔离和处理权限已建立，预览仍只读取公开样例，不访问真实邮箱或外部模型。</p><dl><dt>本机保护</dt><dd>{foundationStatus}</dd><dt>本地存储</dt><dd>数据库已初始化；演示数据仍独立读取公开样例，未导入真实邮件。</dd><dt>数据来源</dt><dd>30 封虚构邮件，彼此引用的标注日程</dd><dt>模型与检索</dt><dd>预置回答；没有模型调用或向量检索</dd><dt>保存方式</dt><dd>页面内存，刷新后星标和对话重置</dd><dt>后续连接</dt><dd>本地 EML/MBOX → 只读 IMAP / MCP</dd></dl><p className="dialog-note">邮箱选择、授权及数据清理会在后续阶段提供，此处尚未实现真实连接。</p></div>}</dialog>
+    <dialog ref={dialog} onCancel={closeDialog} onClose={closeDialog} aria-labelledby="dialog-title"><div className="dialog-header"><h2 id="dialog-title">{selectedMail ? '虚构邮件详情' : '演示与隐私'}</h2><button autoFocus onClick={closeDialog} aria-label="关闭">×</button></div>{selectedMail ? <div className="dialog-content"><span className="tiny-label">FICTIONAL · {selectedMail.id}</span><h3>{selectedMail.subject}</h3><p className="subtle">{selectedMail.sender_name} &lt;{selectedMail.sender}&gt;</p><p className="mail-body">{selectedMail.body_text}</p><p className="dialog-note">这是一封人工构造的虚构邮件，不来自真实邮箱。</p></div> : <div className="dialog-content"><p className="settings-lead">先体验，再连接。</p><p>当前已支持 M3 本地邮件导入。顶部导入区保存你主动选择的文件；下方三栏独立使用虚构样例和预置回答。</p><dl><dt>本机保护</dt><dd>{foundationStatus}</dd><dt>本地存储</dt><dd>导入区确认后写入本机数据库；虚构演示独立读取公开样例。</dd><dt>数据来源</dt><dd>30 封虚构邮件，彼此引用的标注日程</dd><dt>模型与检索</dt><dd>预置回答；没有模型调用或向量检索</dd><dt>保存方式</dt><dd>页面内存，刷新后星标和对话重置</dd><dt>后续连接</dt><dd>本地 EML/MBOX → 只读 IMAP / MCP</dd></dl><p className="dialog-note">本地来源与时区可自行选择；邮箱账号连接及完整设置界面会在后续阶段提供。</p></div>}</dialog>
   </>
 }

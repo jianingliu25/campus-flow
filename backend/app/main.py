@@ -1,6 +1,8 @@
-"""M2 local foundation; fixture preview stays separate from private source data."""
+"""M3 local import; fixture preview stays separate from private source data."""
 
 from contextlib import asynccontextmanager
+import asyncio
+from contextlib import suppress
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -9,10 +11,12 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.foundation import router
+from app.api.imports import router as import_router
 from app.config import ROOT, get_settings
 from app.db import Database
 from app.demo import demo_payload
 from app.llm.compatible import ProviderConfig
+from app.ingest.previews import PreviewStore
 from app.security.http import LocalBoundaryMiddleware
 from app.security.policies import BoundaryError
 from app.security.session import SessionManager
@@ -29,13 +33,23 @@ def create_app(settings=None, database=None, provider_config=None):
         application.state.database = store
         application.state.sessions = SessionManager(workspace_id)
         application.state.provider_config = provider_config or ProviderConfig.from_environment()
+        application.state.previews = PreviewStore()
+        async def expire_previews():
+            while True:
+                await asyncio.sleep(30)
+                application.state.previews.clear_expired()
+        cleaner = asyncio.create_task(expire_previews())
         try:
             yield
         finally:
+            cleaner.cancel()
+            with suppress(asyncio.CancelledError):
+                await cleaner
+            application.state.previews.items.clear()
             if owned_db:
                 store.close()
 
-    application = FastAPI(title="Campus Flow — M2 local foundation", version="0.2.0", lifespan=lifespan)
+    application = FastAPI(title="Campus Flow — M3 local import", version="0.3.0", lifespan=lifespan)
     application.add_middleware(LocalBoundaryMiddleware)
     application.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "[::1]"])
 
@@ -52,9 +66,10 @@ def create_app(settings=None, database=None, provider_config=None):
         return JSONResponse({"code": "STORE_UNAVAILABLE"}, 503)
 
     application.include_router(router)
+    application.include_router(import_router)
     @application.get("/api/health")
     def health():
-        return {"status": "ok", "milestone": "M2", "mode": "local-foundation", "real_sources_enabled": False}
+        return {"status": "ok", "milestone": "M3", "mode": "local-import", "real_sources_enabled": False, "local_import_enabled": True}
 
     @application.get("/api/demo")
     def demo():

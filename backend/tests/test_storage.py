@@ -25,7 +25,7 @@ def test_migration_matches_models_and_repeats(store):
         assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
         assert connection.scalar(text("PRAGMA foreign_keys")) == 1
         assert connection.scalar(text("PRAGMA journal_mode")) == "wal"
-        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0001"
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0002"
 
 
 def test_email_document_outbox_are_atomic_and_idempotent(store):
@@ -83,10 +83,38 @@ def test_no_body_policy_and_utc_storage(store):
 def test_initial_migration_round_trip(tmp_path):
     from app.db import Database
     db = Database(tmp_path / "migration-roundtrip")
-    db.migrate()
+    with db.engine.begin() as connection:
+        command.upgrade(db.migration_config(connection), "0001")
     with db.engine.begin() as connection:
         command.downgrade(db.migration_config(connection), "base")
         assert inspect(connection).get_table_names() == ["alembic_version"]
     db.migrate()
     assert set(inspect(db.engine).get_table_names()) == set(Base.metadata.tables) | {"alembic_version"}
+    db.close()
+
+
+def test_populated_m2_upgrade_preserves_email_and_referenced_event(tmp_path):
+    from app.db import Database
+    db = Database(tmp_path / "populated-m2")
+    with db.engine.begin() as connection:
+        command.upgrade(db.migration_config(connection), "0001")
+        connection.execute(text("INSERT INTO workspaces VALUES ('w','fictional','UTC','2026-10-12 00:00:00')"))
+        connection.execute(text("INSERT INTO sources VALUES ('s','w','local_files','fictional',NULL,'{}',NULL,'configured',1,1,'2026-10-12 00:00:00')"))
+        connection.execute(text("INSERT INTO emails (id,external_id,content_hash,subject,sender,body_text,received_at,local_star,local_read,revision,workspace_id,source_id) VALUES ('m','external','hash','fictional','fake@example.org','keep me','2026-10-12 00:00:00',0,0,1,'w','s')"))
+        values = {'id': 'e', 'title': 'keep event', 'type': 'course', 'all_day': False,
+                  'source_email_id': 'm', 'status': 'confirmed', 'evidence': 'keep me',
+                  'user_modified': True, 'workspace_id': 'w', 'source_id': 's'}
+        # Fill non-null original defaults from the frozen M2 schema.
+        for column in inspect(connection).get_columns('events'):
+            if not column['nullable'] and column['name'] not in values:
+                values[column['name']] = 1 if isinstance(column['type'], __import__('sqlalchemy').Integer) else '2026-10-12 00:00:00'
+        connection.execute(text(f"INSERT INTO events ({','.join(values)}) VALUES ({','.join(':'+key for key in values)})"), values)
+    db.migrate()
+    with db.transaction() as session:
+        mail = session.get(Email, 'm')
+        event = session.get(CampusEvent, 'e')
+        assert mail.body_text == 'keep me' and mail.received_at == mail.sorting_timestamp
+        assert event.title == 'keep event' and event.user_modified and event.source_email_id == mail.id
+    with db.engine.connect() as connection:
+        assert connection.execute(text('PRAGMA foreign_key_check')).all() == []
     db.close()

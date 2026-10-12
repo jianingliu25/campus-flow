@@ -71,7 +71,13 @@ print(f'Validated {len(bundle.emails)} fictional emails, {len(bundle.events)} ev
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["setup", "build", "validate", "test", "demo", "migrate", "db-status"])
+    parser.add_argument("command", choices=["setup", "build", "validate", "test", "demo", "migrate", "db-status", "import"])
+    parser.add_argument("--file")
+    parser.add_argument("--directory")
+    parser.add_argument("--source-id")
+    parser.add_argument("--label", default="本地导入")
+    parser.add_argument("--mode", choices=["browse", "rules"], default="browse")
+    parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--port", type=int, default=8000, help="Demo server port (loopback only)")
     parser.add_argument("--no-build", action="store_true", help="Serve an existing frontend build")
     args = parser.parse_args()
@@ -86,6 +92,19 @@ def main():
             require_environment()
             if args.command == "validate":
                 validate()
+            elif args.command == "import":
+                if not args.file and not args.directory:
+                    parser.error("import requires --file or --directory")
+                command = [PYTHON, "-m", "app.ingest.cli", "--mode", args.mode, "--label", args.label]
+                if args.file:
+                    command += ["--file", Path(args.file).absolute()]
+                if args.directory:
+                    command += ["--directory", Path(args.directory).absolute()]
+                if args.source_id:
+                    command += ["--source-id", args.source_id]
+                if args.dry_run:
+                    command += ["--dry-run"]
+                run(command, cwd=ROOT / "backend")
             elif args.command == "test":
                 run([PYTHON, "-m", "pytest"], cwd=ROOT / "backend")
                 build()

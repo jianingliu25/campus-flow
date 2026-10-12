@@ -22,6 +22,7 @@ class StrictBody(BaseModel):
 class CreateSource(StrictBody):
     kind: Literal["fixture", "local_files", "imap", "mcp"]
     display_name: str = Field(min_length=1, max_length=80, pattern=r"\S")
+    timezone: str | None = Field(default=None, max_length=80)
 
 
 class Scope(StrictBody):
@@ -52,7 +53,7 @@ def session_info(request, session):
     return {"csrf_token": session.csrf_token, "workspace_id": session.workspace_id,
             "active_source_id": session.active_source_id, "ttl_seconds": int(max(0, session.expires_at - request.app.state.sessions.clock())),
             "provider_mode": config.mode, "provider_fingerprint": config.fingerprint,
-            "remote_globally_enabled": config.global_remote, "milestone": "M2"}
+            "remote_globally_enabled": config.global_remote, "milestone": "M3"}
 
 
 @router.post("/session")
@@ -84,7 +85,8 @@ def logout(request: Request, response: Response, session=Depends(local_session))
 def source_view(source):
     # Do not serialize the ORM object, safe_config or credential_ref wholesale.
     return {"id": source.id, "kind": source.kind, "display_name": source.display_name,
-            "status": source.status, "policy_version": source.policy_version, "connector_enabled": False}
+            "status": source.status, "policy_version": source.policy_version, "connector_enabled": False,
+            "timezone": source.safe_config.get("timezone")}
 
 
 def policy_view(policy):
@@ -104,6 +106,13 @@ def sources(request: Request, session=Depends(local_session)):
 def add_source(body: CreateSource, request: Request, session=Depends(local_session)):
     with db(request).transaction() as transaction:
         source = create_source(transaction, session.workspace_id, body.kind, body.display_name.strip())
+        if body.timezone:
+            from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+            try:
+                ZoneInfo(body.timezone)
+            except (ZoneInfoNotFoundError, ValueError):
+                raise BoundaryError("INVALID_TIMEZONE", 422) from None
+            source.safe_config = {"timezone": body.timezone}
         return source_view(source)
 
 
@@ -152,10 +161,11 @@ def patch_policy(source_id: str, body: PolicyPatch, request: Request, session=De
 
 
 @router.get("/emails")
-def emails(request: Request, limit: int = Query(default=50, ge=1, le=100), ctx=Depends(source_context)):
+def emails(request: Request, limit: int = Query(default=50, ge=1, le=200), ctx=Depends(source_context)):
     with db(request).transaction() as transaction:
         return [{"id": mail.id, "source_id": mail.source_id, "subject": mail.subject, "summary": mail.summary,
-                 "received_at": mail.received_at, "category": mail.category} for mail in list_emails(transaction, ctx, limit)]
+                 "received_at": mail.received_at, "category": mail.category, "date_status": mail.date_status,
+                 "extraction_status": mail.extraction_status, "extraction_method": mail.extraction_method} for mail in list_emails(transaction, ctx, limit)]
 
 
 @router.get("/emails/{email_id}")
@@ -166,15 +176,20 @@ def email_detail(email_id: str, request: Request, ctx=Depends(source_context)):
         if mail is None:
             raise BoundaryError("EMAIL_NOT_FOUND", 404)
         return {"id": mail.id, "source_id": mail.source_id, "subject": mail.subject, "sender": mail.sender,
-                "body_text": mail.body_text, "summary": mail.summary, "received_at": mail.received_at}
+                "body_text": mail.body_text, "summary": mail.summary, "received_at": mail.received_at,
+                "import_warnings": mail.import_warnings, "source_locator": mail.source_locator,
+                "extraction_warnings": mail.extraction_warnings, "extraction_status": mail.extraction_status}
 
 
 @router.get("/events")
-def events(request: Request, limit: int = Query(default=50, ge=1, le=100), ctx=Depends(source_context)):
+def events(request: Request, limit: int = Query(default=50, ge=1, le=200), ctx=Depends(source_context)):
     with db(request).transaction() as transaction:
         scoped_source(transaction, ctx)
         return [{"id": event.id, "source_id": event.source_id, "title": event.title, "status": event.status,
-                 "start_at_utc": event.start_at_utc, "deadline_date": event.deadline_date}
+                 "start_at_utc": event.start_at_utc, "end_at_utc": event.end_at_utc, "deadline_date": event.deadline_date,
+                 "event_date": event.event_date, "location": event.location, "type": event.type,
+                 "source_email_id": event.source_email_id, "source_changed": event.source_changed,
+                 "all_day": event.all_day}
                 for event in transaction.scalars(owned_query(CampusEvent, ctx).order_by(CampusEvent.created_at).limit(limit))]
 
 

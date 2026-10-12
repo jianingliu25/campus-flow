@@ -27,13 +27,20 @@ class LocalBoundaryMiddleware:
             if request.headers.get("sec-fetch-site") in {"cross-site", "same-site"} or (origin is not None and origin != expected) or (unsafe and origin is None):
                 return await JSONResponse({"code": "ORIGIN_REJECTED"}, 403)(scope, receive, send)
         if unsafe:
+            limit = self.max_body
+            if request.url.path == "/api/imports/preview":
+                try:
+                    source_context(request)  # before allocating a large upload buffer
+                except BoundaryError as error:
+                    return await JSONResponse({"code": error.code}, error.status)(scope, receive, send)
+                limit = 10 * 1024 * 1024
             body = bytearray()
             while True:
                 message = await receive()
                 if message["type"] == "http.disconnect":
                     return
                 body.extend(message.get("body", b""))
-                if len(body) > self.max_body:
+                if len(body) > limit:
                     return await JSONResponse({"code": "BODY_TOO_LARGE"}, 413)(scope, receive, send)
                 if not message.get("more_body", False):
                     break

@@ -3,7 +3,7 @@
 from datetime import date, datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Float, ForeignKey, ForeignKeyConstraint, Integer, JSON, String, Text, UniqueConstraint, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.types import TypeDecorator
 
@@ -116,7 +116,16 @@ class Email(SourceOwned, Base):
     subject: Mapped[str] = mapped_column(Text)
     sender: Mapped[str] = mapped_column(Text)
     body_text: Mapped[str | None] = mapped_column(Text)
-    received_at: Mapped[datetime] = mapped_column(UTCDateTime())
+    received_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
+    sorting_timestamp: Mapped[datetime] = mapped_column(UTCDateTime(), default=utcnow)
+    canonical_hash: Mapped[str | None] = mapped_column(String(64))
+    imported_at: Mapped[datetime | None] = mapped_column(UTCDateTime())
+    date_status: Mapped[str] = mapped_column(String(30), default="known", server_default="known")
+    import_warnings: Mapped[list] = mapped_column(JSON, default=list, server_default=text("'[]'"))
+    source_locator: Mapped[str | None] = mapped_column(String(160))
+    extraction_status: Mapped[str] = mapped_column(String(30), default="not_processed", server_default="not_processed")
+    extraction_method: Mapped[str | None] = mapped_column(String(30))
+    extraction_warnings: Mapped[list] = mapped_column(JSON, default=list, server_default=text("'[]'"))
     category: Mapped[str | None] = mapped_column(String(20))
     local_star: Mapped[bool] = mapped_column(Boolean, default=False)
     local_read: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -135,6 +144,8 @@ class CampusEvent(SourceOwned, Base):
     source_timezone: Mapped[str | None] = mapped_column(String(80))
     all_day: Mapped[bool] = mapped_column(Boolean, default=False)
     deadline_date: Mapped[date | None] = mapped_column(Date)
+    event_date: Mapped[date | None] = mapped_column(Date)
+    source_changed: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("0"))
     location: Mapped[str | None] = mapped_column(Text)
     source_email_id: Mapped[str | None] = mapped_column(String(36))
     status: Mapped[str] = mapped_column(String(30), default="needs_confirmation")

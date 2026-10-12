@@ -18,6 +18,8 @@ models/
 *.index
 *.eml
 *.mbox
+!fixtures/mail/*.eml
+!fixtures/mail/*.mbox
 *.pst
 *.ost
 *.log

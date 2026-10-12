@@ -29,3 +29,16 @@ Protected API scaffold:
 - GET /api/emails, /api/emails/{id}, /api/events, /api/index-status: session and current-source header required. No import/sync/inference routes yet.
 
 Full source/model management UI remains M3–M5. Current settings show foundation startup status; the public preview does not pretend to come from configured real sources.
+# M3 ingestion extension
+
+Browser binary upload → bounded text-only MIME decoder → session/source-bound
+memory preview → explicit selection → scoped per-mail transactions → normalized
+mail and validated candidates → durable index outbox. The default import mode is
+browse; rule extraction is an explicit local fallback. Model reprocessing uses the
+existing ProcessingGateway and validates JSON/evidence before committing results.
+
+Canonical hashes and sender-scoped Message-ID hashes deduplicate within a source.
+Import timestamps are distinct from nullable original received timestamps. Migration
+0002 adds import/extraction metadata with native SQLite column operations, avoiding
+table recreation that could cascade-delete referenced data. Main dashboard fixtures
+remain isolated from private import results until M4.

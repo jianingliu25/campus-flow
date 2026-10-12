@@ -19,3 +19,18 @@ retain_body=false constrains subsequent ingestion calls; setting it does not yet
 Index claims are leased and revision/generation-aware; only current acknowledged SQL documents may be retrieved. A concrete writer must enforce durable idempotency and old-version rejection. M2 tests the contract with an in-memory writer. FAISS, actual embedding weights and physical index deletion are not claimed implemented.
 
 This is a single-person local application. Origin checks protect against hostile websites; local malware and OS administrators are outside the application's trust boundary. Keep the app on loopback. Revocation can block results and later calls, but cannot retract a request already sent to a provider.
+# M3 local files
+
+Local EML/MBOX import requires choosing a file, reviewing a memory-only preview,
+and confirming selected messages. Raw files and attachments are not persisted;
+normalized text is stored according to the selected source policy. HTML is text-only,
+and importing or rule processing makes no provider calls. Memory previews expire
+after ten minutes and cannot be reused across sessions or sources. Unknown mail
+dates remain unknown rather than being assigned the processing date.
+
+`retain_body=false` controls the normalized original body, not derivative summaries,
+event evidence or index text. Full source erasure is a later milestone. Do not commit
+runtime databases, user-selected mail, credentials or screenshots of private content.
+The two tracked files under `fixtures/mail` are newly authored fictional samples.
+
+See [M3 usage and limits](milestones/M3.md) for scope and processing behavior.
