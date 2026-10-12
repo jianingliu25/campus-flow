@@ -19,7 +19,7 @@ from app.ingest.extraction import rule_extract, validate_candidates
 async def evaluate():
     path = ROOT / "eval/holdout/intent.json"
     manifest = json.loads((path.parent / "manifest.json").read_text(encoding="utf-8"))
-    if hashlib.sha256(path.read_bytes()).hexdigest() != manifest["sha256"]:
+    if hashlib.sha256(path.read_text(encoding="utf-8").encode("utf-8")).hexdigest() != manifest["sha256"]:
         raise ValueError("Frozen evaluation hash changed")
     cases = json.loads(path.read_text(encoding="utf-8")); labels = sorted({item["intent"] for item in cases})
     predictions = [{**item, "predicted": route(item["query"]).intents[0]} for item in cases]
