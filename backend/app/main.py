@@ -35,10 +35,19 @@ def create_app(settings=None, database=None, provider_config=None):
         application.state.sessions = SessionManager(workspace_id)
         application.state.provider_config = provider_config or ProviderConfig.from_environment()
         application.state.previews = PreviewStore()
+        from app.security.credentials import CredentialStore, WindowsVault
+        from app.sources.sync import SyncManager
+        try:
+            vault=WindowsVault()
+        except BoundaryError:
+            vault=None
+        application.state.credentials=CredentialStore(vault)
+        application.state.sync=SyncManager(store,application.state.credentials)
         async def expire_previews():
             while True:
                 await asyncio.sleep(30)
                 application.state.previews.clear_expired()
+                application.state.credentials.clear_expired()
         cleaner = asyncio.create_task(expire_previews())
         try:
             yield
@@ -47,6 +56,8 @@ def create_app(settings=None, database=None, provider_config=None):
             with suppress(asyncio.CancelledError):
                 await cleaner
             application.state.previews.items.clear()
+            await application.state.sync.shutdown()
+            application.state.credentials.items.clear()
             if owned_db:
                 store.close()
 
@@ -70,6 +81,8 @@ def create_app(settings=None, database=None, provider_config=None):
     application.include_router(import_router)
     from app.api.dashboard import router as dashboard_router
     application.include_router(dashboard_router)
+    from app.api.connectors import router as connector_router
+    application.include_router(connector_router)
     @application.get("/api/health")
     def health():
         return {"status": "ok", "milestone": "M4", "mode": "local-dashboard", "real_sources_enabled": False, "local_import_enabled": True}

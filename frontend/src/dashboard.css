@@ -50,6 +50,9 @@ button.primary-button { background: #b0dfbe; color: #112319; border-color: #b0df
 .settings-content > p { color: #b3c8bb; }
 .settings-content .tabs { position: sticky; top: 0; background: #151c17; padding: 8px 0; z-index: 1; }
 .settings-content dl { font-size: 12px; }
+.connector-actions { margin: 16px 0; padding: 12px 16px; border: 1px solid #354d3e; background: #121d16; border-radius: 8px; font-size: 12px; }
+.connector-actions label { display: grid; gap: 5px; color: #b8d2c2; }
+.connector-actions select { border: 1px solid #47604f; border-radius: 5px; background: #14261b; color: #d6eadf; padding: 8px; }
 @media (max-width: 1100px) { .source-selector select { max-width: 180px; } .header-inner { gap: 14px; } }
 @media (max-width: 650px) {
   .header-inner { gap: 10px; }

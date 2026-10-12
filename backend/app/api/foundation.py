@@ -79,6 +79,8 @@ def get_session(request: Request, response: Response, session=Depends(local_sess
 
 @router.delete("/session", status_code=204)
 def logout(request: Request, response: Response, session=Depends(local_session)):
+    request.app.state.credentials.clear_owner(session)
+    request.app.state.previews.clear_owner(session)
     request.app.state.sessions.revoke(request.cookies[COOKIE_NAME])
     response.delete_cookie(COOKIE_NAME, path="/api")
 
@@ -93,7 +95,7 @@ def deactivate_source(request: Request, session=Depends(local_session)):
 def source_view(source):
     # Do not serialize the ORM object, safe_config or credential_ref wholesale.
     return {"id": source.id, "kind": source.kind, "display_name": source.display_name,
-            "status": source.status, "policy_version": source.policy_version, "connector_enabled": False,
+            "status": source.status, "policy_version": source.policy_version, "connector_enabled": source.kind in {"imap","mcp"},
             "timezone": source.safe_config.get("timezone")}
 
 

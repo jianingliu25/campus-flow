@@ -71,7 +71,7 @@ print(f'Validated {len(bundle.emails)} fictional emails, {len(bundle.events)} ev
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["setup", "build", "validate", "test", "demo", "migrate", "db-status", "import"])
+    parser.add_argument("command", choices=["setup", "build", "validate", "test", "demo", "migrate", "db-status", "import", "mcp-demo"])
     parser.add_argument("--file")
     parser.add_argument("--directory")
     parser.add_argument("--source-id")
@@ -127,6 +127,10 @@ finally:
     db.close()
 """
                 run([PYTHON, "-c", code], cwd=ROOT / "backend")
+            elif args.command == "mcp-demo":
+                port = 8990 if args.port == 8000 else args.port
+                print(f"Fictional MCP service: http://127.0.0.1:{port}/mcp", flush=True)
+                run([PYTHON, "-m", "uvicorn", "app.sources.demo_server:app", "--host", "127.0.0.1", "--port", str(port)], cwd=ROOT / "backend")
             elif args.command == "demo":
                 if not args.no_build:
                     build()

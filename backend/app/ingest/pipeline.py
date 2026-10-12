@@ -47,12 +47,12 @@ def save_candidates(session, ctx, mail, extraction, method, received, body, time
     return len(values), warnings
 
 
-def import_one(database, ctx, parsed, mode, expected_policy_version):
+def import_one(database, ctx, parsed, mode, expected_policy_version, allowed_kinds=("local_files",)):
     if mode not in {"browse", "rules"}:
         raise BoundaryError("INVALID_IMPORT_MODE", 422)
     with database.transaction() as session:
         source, policy = scoped_source(session, ctx), scoped_policy(session, ctx)
-        if source.kind != "local_files":
+        if source.kind not in allowed_kinds:
             raise BoundaryError("NOT_LOCAL_FILE_SOURCE")
         if policy.version != expected_policy_version:
             raise BoundaryError("POLICY_VERSION_CHANGED", 409)

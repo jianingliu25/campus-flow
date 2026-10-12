@@ -64,7 +64,7 @@ def test_policy_defaults_cas_and_error_redaction(browser_client, store):
     response = client.post("/api/sources", json={"kind": "imap", "display_name": "fake", "password": "fixture-secret-never-echo"})
     assert response.status_code == 422 and "fixture-secret-never-echo" not in response.text
     assert client.post("/api/sources", content="x" * 262145).status_code == 413
-    assert client.post(f"/api/sources/{a.source_id}/sync").status_code == 404
+    assert client.post(f"/api/sources/{a.source_id}/sync").status_code == 409  # explicit active-source selection required
 
 
 def test_expanding_scope_revokes_provider_consent(browser_client, store):
