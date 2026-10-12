@@ -1,4 +1,4 @@
-"""M2 configuration and scoped reads; no connector, sync, or inference routes."""
+"""Configuration, scoped reads and local mail flags; no connector sync routes."""
 
 from typing import Annotated, Literal
 
@@ -53,7 +53,8 @@ def session_info(request, session):
     return {"csrf_token": session.csrf_token, "workspace_id": session.workspace_id,
             "active_source_id": session.active_source_id, "ttl_seconds": int(max(0, session.expires_at - request.app.state.sessions.clock())),
             "provider_mode": config.mode, "provider_fingerprint": config.fingerprint,
-            "remote_globally_enabled": config.global_remote, "milestone": "M3"}
+            "remote_globally_enabled": config.global_remote, "workspace_timezone": request.app.state.timezone,
+            "milestone": "M4"}
 
 
 @router.post("/session")
@@ -80,6 +81,13 @@ def get_session(request: Request, response: Response, session=Depends(local_sess
 def logout(request: Request, response: Response, session=Depends(local_session)):
     request.app.state.sessions.revoke(request.cookies[COOKIE_NAME])
     response.delete_cookie(COOKIE_NAME, path="/api")
+
+
+@router.post("/sources/deactivate")
+def deactivate_source(request: Request, session=Depends(local_session)):
+    request.app.state.previews.clear_owner(session)
+    session.active_source_id = None
+    return {"active_source_id": None}
 
 
 def source_view(source):
@@ -120,6 +128,8 @@ def add_source(body: CreateSource, request: Request, session=Depends(local_sessi
 def activate_source(source_id: str, request: Request, session=Depends(local_session)):
     with db(request).transaction() as transaction:
         scoped_source(transaction, SourceContext(session.workspace_id, source_id))
+    if session.active_source_id != source_id:
+        request.app.state.previews.clear_owner(session)
     session.active_source_id = source_id
     return {"active_source_id": source_id}
 
@@ -178,7 +188,29 @@ def email_detail(email_id: str, request: Request, ctx=Depends(source_context)):
         return {"id": mail.id, "source_id": mail.source_id, "subject": mail.subject, "sender": mail.sender,
                 "body_text": mail.body_text, "summary": mail.summary, "received_at": mail.received_at,
                 "import_warnings": mail.import_warnings, "source_locator": mail.source_locator,
-                "extraction_warnings": mail.extraction_warnings, "extraction_status": mail.extraction_status}
+                "extraction_warnings": mail.extraction_warnings, "extraction_status": mail.extraction_status,
+                "local_star": mail.local_star, "local_read": mail.local_read, "date_status": mail.date_status,
+                "extraction_method": mail.extraction_method}
+
+
+class MailFlags(StrictBody):
+    local_star: bool | None = None
+    local_read: bool | None = None
+
+
+@router.patch("/emails/{email_id}/flags")
+def update_flags(email_id: str, body: MailFlags, request: Request, ctx=Depends(source_context)):
+    changes = body.model_dump(exclude_none=True)
+    if not changes:
+        raise BoundaryError("EMPTY_FLAGS_UPDATE", 422)
+    with db(request).transaction() as transaction:
+        scoped_source(transaction, ctx)
+        result = transaction.execute(update(Email).where(Email.id == email_id, Email.source_id == ctx.source_id,
+                                                        Email.workspace_id == ctx.workspace_id).values(**changes))
+        if result.rowcount != 1:
+            raise BoundaryError("EMAIL_NOT_FOUND", 404)
+        mail = transaction.get(Email, email_id)
+        return {"id": mail.id, "local_star": mail.local_star, "local_read": mail.local_read}
 
 
 @router.get("/events")

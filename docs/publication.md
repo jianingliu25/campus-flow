@@ -1,6 +1,6 @@
 # Early public checkpoint
 
-This repository publishes the newly written Campus Flow reconstruction through M3.
+This repository publishes the newly written Campus Flow reconstruction through M4.
 It is an early preview, not a completed v1.0 or an original-course-code release.
 
 Published under [jianingliu25/campus-flow](https://github.com/jianingliu25/campus-flow).
@@ -19,6 +19,6 @@ repository's main branch and README; the complete release will use the same addr
 The link shares source code and documentation, not a hosted live app. The preview
 is launched locally using the README commands.
 
-Current acceptance: M1 fixture preview, M2 local foundation and M3 local import.
-M4 full UI, M5 IMAP/MCP, M6 SMOA, M7 recommendations, M8 evaluation and final M9
+Current acceptance: M1 fixture preview, M2 local foundation, M3 local import and M4 UI.
+M5 IMAP/MCP, M6 SMOA, M7 recommendations, M8 evaluation and final M9
 release remain the roadmap. No deployment or background automation is configured.

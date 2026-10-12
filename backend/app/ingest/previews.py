@@ -56,6 +56,11 @@ class PreviewStore:
     def discard(self, id, session, ctx):
         self.take(id, session, ctx)
 
+    def clear_owner(self, session):
+        owner = self.owner(session)
+        with self.lock:
+            self.items = {id: item for id, item in self.items.items() if item.owner != owner}
+
 
 def filter_scope(mails, scope, now):
     from datetime import timedelta

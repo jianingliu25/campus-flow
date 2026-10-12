@@ -42,3 +42,18 @@ Import timestamps are distinct from nullable original received timestamps. Migra
 0002 adds import/extraction metadata with native SQLite column operations, avoiding
 table recreation that could cascade-delete referenced data. Main dashboard fixtures
 remain isolated from private import results until M4.
+
+## M4 source-aware views
+
+The first-use screen requires explicit source choice. A source-bound `/api/dashboard`
+snapshot supplies 50-item email/event pages and source-wide counts under a SQLite
+read transaction. Body text is fetched only for an opened mail detail; summaries
+and event evidence still contain derivative mail content. Local flag writes are
+scoped, CSRF-protected and independent of content/index revisions.
+
+Header source selection controls the calendar, email, assistant and settings views.
+Requests bind to their initiating source; source switching clears UI detail/chat
+and server-side previews. Full conversation and mobile panel views reuse mounted
+components. Shortcuts use visible-page data directly, not an LLM or vector search.
+Provider status exposes configured mode/host without credentials; consent saves
+continue through the versioned M2 gate. No migration beyond 0002 is needed for M4.

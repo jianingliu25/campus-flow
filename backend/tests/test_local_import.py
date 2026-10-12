@@ -183,6 +183,7 @@ def test_preview_source_switch_policy_change_and_csrf(browser_client, store):
     assert client.post(f"/api/imports/{token}/commit", json={"selected": [0]}).status_code == 404
     client.post(f"/api/sources/{a.source_id}/activate")
     client.headers["X-CampusFlow-Source"] = a.source_id
+    token = client.post("/api/imports/preview", content=raw_mail(dated=False).as_bytes(), headers={"X-Mail-Filename": "fake.eml"}).json()["preview_id"]
     client.patch(f"/api/sources/{a.source_id}/policy", json={"expected_version": 1, "retain_body": False})
     response = client.post(f"/api/imports/{token}/commit", json={"selected": [0]})
     assert response.json()["processed"] == 0

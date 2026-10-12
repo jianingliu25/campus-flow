@@ -1,10 +1,11 @@
 import type { Demo } from '../types'
 
-interface LocalSession {
+export interface LocalSession {
   csrf_token: string
   active_source_id: string | null
   ttl_seconds: number
   milestone: string
+  workspace_timezone: string
 }
 let sessionRequest: Promise<LocalSession> | undefined
 
@@ -21,11 +22,12 @@ export function establishSession(): Promise<LocalSession> {
   return sessionRequest
 }
 
-export async function privateRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function privateRequest<T>(path: string, options: RequestInit = {}, sourceId?: string | null): Promise<T> {
   if (!path.startsWith('/api/') || path.startsWith('/api//')) throw new Error('仅允许本机 API')
   const session = await establishSession()
   const headers = new Headers(options.headers)
-  if (session.active_source_id) headers.set('X-CampusFlow-Source', session.active_source_id)
+  const selected = sourceId === undefined ? session.active_source_id : sourceId
+  if (selected) headers.set('X-CampusFlow-Source', selected)
   if (options.method && !['GET', 'HEAD', 'OPTIONS'].includes(options.method.toUpperCase())) headers.set('X-CSRF-Token', session.csrf_token)
   const response = await fetch(path, { ...options, credentials: 'same-origin', redirect: 'error', headers })
   if (response.status === 401) sessionRequest = undefined
@@ -41,11 +43,25 @@ export async function privateRequest<T>(path: string, options: RequestInit = {})
       SOURCE_SELECTION_CHANGED: '来源或会话已变化，请重新选择来源。',
       UNSUPPORTED_MAIL_FORMAT: '仅支持 EML 和 MBOX 邮件文件。',
       INVALID_MBOX: '这个文件不符合支持的 MBOX 格式。',
+      SESSION_REQUIRED: '会话已结束，请重新选择来源。',
+      SESSION_EXPIRED: '会话已过期，请重新选择来源。',
+      SELECT_SOURCE_FIRST: '请重新选择来源后再试。',
+      PROVIDER_NOT_CONFIGURED: '模型尚未配置，可先使用规则提取。',
+      EXTRACTION_OUTPUT_INVALID: '模型返回结果不符合要求；原邮件已保留。',
+      INVALID_REQUEST: '输入未通过检查，请核对后重试。',
+      BODY_TOO_LARGE: '文件超过允许大小，请缩小导出范围。',
+      PREVIEW_CAPACITY: '当前预览已达上限，请取消旧预览或稍后再试。',
     }
     throw new Error(messages[data.code || ''] || `本机请求未完成（${data.code || response.status}）`)
   }
   if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
+}
+
+export async function deactivateSource(): Promise<void> {
+  await privateRequest('/api/sources/deactivate', { method: 'POST' })
+  const session = await establishSession()
+  session.active_source_id = null
 }
 
 export async function activateSource(id: string): Promise<void> {

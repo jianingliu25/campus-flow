@@ -34,3 +34,16 @@ runtime databases, user-selected mail, credentials or screenshots of private con
 The two tracked files under `fixtures/mail` are newly authored fictional samples.
 
 See [M3 usage and limits](milestones/M3.md) for scope and processing behavior.
+
+## M4 source selection and settings
+
+Refresh requires explicit source selection before mail content is loaded. Switching
+to another source or fictional preview clears mail/event detail, current chat and
+memory previews. Requests are bound to the initiating source ID and rejected if
+the session selection changes. Local stars/read flags persist only in SQLite.
+
+The settings UI can change future import scope, body retention and provider-specific
+cloud consent. Opening settings or using assistant shortcuts makes no model call.
+Private mail, chat and source selection are not stored in browser localStorage or
+sessionStorage. This does not imply encryption or retroactive content deletion.
+See [M4](milestones/M4.md) for pagination scope and current limitations.

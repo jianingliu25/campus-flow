@@ -132,7 +132,7 @@ finally:
                     build()
                 if not (ROOT / "frontend/dist/index.html").is_file():
                     raise RuntimeError("Frontend build missing. Run without --no-build.")
-                print(f"Fictional demo only: http://127.0.0.1:{args.port}", flush=True)
+                print(f"Local app (fictional preview or selected mail): http://127.0.0.1:{args.port}", flush=True)
                 run([PYTHON, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", args.port], cwd=ROOT / "backend")
     except (RuntimeError, OSError, subprocess.CalledProcessError) as error:
         print(f"Campus Flow: {error}", file=sys.stderr)

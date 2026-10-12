@@ -31,6 +31,7 @@ def create_app(settings=None, database=None, provider_config=None):
         store.migrate()
         workspace_id = store.ensure_workspace(configuration.timezone)
         application.state.database = store
+        application.state.timezone = configuration.timezone
         application.state.sessions = SessionManager(workspace_id)
         application.state.provider_config = provider_config or ProviderConfig.from_environment()
         application.state.previews = PreviewStore()
@@ -49,7 +50,7 @@ def create_app(settings=None, database=None, provider_config=None):
             if owned_db:
                 store.close()
 
-    application = FastAPI(title="Campus Flow — M3 local import", version="0.3.0", lifespan=lifespan)
+    application = FastAPI(title="Campus Flow — M4 dashboard", version="0.4.0", lifespan=lifespan)
     application.add_middleware(LocalBoundaryMiddleware)
     application.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "[::1]"])
 
@@ -67,9 +68,11 @@ def create_app(settings=None, database=None, provider_config=None):
 
     application.include_router(router)
     application.include_router(import_router)
+    from app.api.dashboard import router as dashboard_router
+    application.include_router(dashboard_router)
     @application.get("/api/health")
     def health():
-        return {"status": "ok", "milestone": "M3", "mode": "local-import", "real_sources_enabled": False, "local_import_enabled": True}
+        return {"status": "ok", "milestone": "M4", "mode": "local-dashboard", "real_sources_enabled": False, "local_import_enabled": True}
 
     @application.get("/api/demo")
     def demo():
