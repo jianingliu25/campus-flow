@@ -54,6 +54,7 @@ def import_one(database, ctx, parsed, mode, expected_policy_version, allowed_kin
     if mode not in {"browse", "rules"}:
         raise BoundaryError("INVALID_IMPORT_MODE", 422)
     with database.transaction() as session:
+        session.connection().exec_driver_sql("BEGIN IMMEDIATE")
         source, policy = scoped_source(session, ctx), scoped_policy(session, ctx)
         if source.kind not in allowed_kinds:
             raise BoundaryError("NOT_LOCAL_FILE_SOURCE")
@@ -115,6 +116,7 @@ async def reprocess(database, ctx, mail_id, mode, provider_config, factory=None)
     except (ValidationError, ValueError):
         raise BoundaryError("EXTRACTION_OUTPUT_INVALID", 502) from None
     with database.transaction() as session:
+        session.connection().exec_driver_sql("BEGIN IMMEDIATE")
         if scoped_policy(session, ctx).version != version:
             raise BoundaryError("POLICY_VERSION_CHANGED", 409)
         mail = session.scalar(owned_query(Email, ctx).where(Email.id == mail_id))

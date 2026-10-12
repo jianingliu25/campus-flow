@@ -57,6 +57,7 @@ async def chat(body:ChatRequest,request:Request,ctx=Depends(source_context)):
                               template_id=result["template_id"][:80],quality_score=result["quality_score"],
                               safe_trajectory={"verification_status":result["verification_status"],"tool_calls":result["tool_calls"],"processing_mode":result["processing_mode"]}))
     result["memory_saved"]=bool(save_memory)
+    result["as_of"]=data.now.isoformat()
     return result
 
 
