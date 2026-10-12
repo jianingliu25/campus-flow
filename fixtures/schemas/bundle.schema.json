@@ -1,0 +1,315 @@
+{
+  "$defs": {
+    "EmailFixture": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source_id": {
+          "const": "demo",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "sender_name": {
+          "title": "Sender Name",
+          "type": "string"
+        },
+        "sender": {
+          "title": "Sender",
+          "type": "string"
+        },
+        "body_text": {
+          "title": "Body Text",
+          "type": "string"
+        },
+        "received_at": {
+          "format": "date-time",
+          "title": "Received At",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "academic",
+            "admin",
+            "activity"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "local_star": {
+          "title": "Local Star",
+          "type": "boolean"
+        },
+        "local_read": {
+          "title": "Local Read",
+          "type": "boolean"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "source_id",
+        "subject",
+        "sender_name",
+        "sender",
+        "body_text",
+        "received_at",
+        "category",
+        "summary",
+        "local_star",
+        "local_read",
+        "tags"
+      ],
+      "title": "EmailFixture",
+      "type": "object"
+    },
+    "EventFixture": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "source_id": {
+          "const": "demo",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_email_id": {
+          "title": "Source Email Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "course",
+            "deadline",
+            "activity",
+            "personal"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "start_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start At"
+        },
+        "end_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End At"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "all_day": {
+          "default": false,
+          "title": "All Day",
+          "type": "boolean"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Location"
+        },
+        "status": {
+          "enum": [
+            "confirmed",
+            "needs_confirmation",
+            "superseded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence": {
+          "title": "Evidence",
+          "type": "string"
+        },
+        "capacity_remaining": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capacity Remaining"
+        },
+        "supersedes_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Supersedes Event Id"
+        }
+      },
+      "required": [
+        "id",
+        "source_id",
+        "source_email_id",
+        "title",
+        "type",
+        "status",
+        "evidence"
+      ],
+      "title": "EventFixture",
+      "type": "object"
+    },
+    "ProfileFixture": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "const": "demo",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "fictional": {
+          "const": true,
+          "title": "Fictional",
+          "type": "boolean"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "major": {
+          "title": "Major",
+          "type": "string"
+        },
+        "grade": {
+          "title": "Grade",
+          "type": "string"
+        },
+        "preferences": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Preferences",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_id",
+        "fictional",
+        "display_name",
+        "major",
+        "grade",
+        "preferences"
+      ],
+      "title": "ProfileFixture",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "fictional": {
+      "const": true,
+      "title": "Fictional",
+      "type": "boolean"
+    },
+    "reference_now": {
+      "format": "date-time",
+      "title": "Reference Now",
+      "type": "string"
+    },
+    "timezone": {
+      "const": "Asia/Shanghai",
+      "title": "Timezone",
+      "type": "string"
+    },
+    "emails": {
+      "items": {
+        "$ref": "#/$defs/EmailFixture"
+      },
+      "title": "Emails",
+      "type": "array"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/EventFixture"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "profile": {
+      "$ref": "#/$defs/ProfileFixture"
+    }
+  },
+  "required": [
+    "schema_version",
+    "fictional",
+    "reference_now",
+    "timezone",
+    "emails",
+    "events",
+    "profile"
+  ],
+  "title": "FixtureBundle",
+  "type": "object"
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "missing_timezone",
+    "kind": "PARAM_ERROR",
+    "input": {
+      "start_at": "2026-10-12T09:00:00"
+    },
+    "source_timezone": "Asia/Shanghai",
+    "expected": "2026-10-12T01:00:00Z"
+  },
+  {
+    "id": "unknown_timezone",
+    "kind": "PARAM_ERROR",
+    "input": {
+      "start_at": "2026-10-12T09:00:00"
+    },
+    "source_timezone": null,
+    "expected": "needs_confirmation"
+  },
+  {
+    "id": "temporary_timeout",
+    "kind": "TOOL_EXECUTION",
+    "input": {
+      "tool": "get_events",
+      "fault": "timeout_once"
+    },
+    "expected": "retry_within_budget"
+  },
+  {
+    "id": "incomplete_conflict",
+    "kind": "INCOMPLETE_RESULT",
+    "input": {
+      "tool": "check_conflicts",
+      "events": null
+    },
+    "expected": "do_not_claim_no_conflict"
+  }
+]

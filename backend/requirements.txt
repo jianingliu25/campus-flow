@@ -1,0 +1,11 @@
+# Install the tested dependency snapshot, not floating versions.
+-c constraints.txt
+fastapi
+uvicorn
+pydantic
+python-dotenv
+tzdata
+pytest
+httpx2
+SQLAlchemy
+alembic

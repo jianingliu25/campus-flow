@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "query": {
+      "title": "Query",
+      "type": "string"
+    },
+    "expected_intent": {
+      "title": "Expected Intent",
+      "type": "string"
+    },
+    "expected_email_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Expected Email Ids",
+      "type": "array"
+    },
+    "expected_event_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Expected Event Ids",
+      "type": "array"
+    },
+    "expected_facts": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Expected Facts",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "query",
+    "expected_intent",
+    "expected_email_ids",
+    "expected_event_ids",
+    "expected_facts"
+  ],
+  "title": "QAFixture",
+  "type": "object"
+}

@@ -1,0 +1,21 @@
+# Privacy boundary — M2
+
+Implemented protections:
+
+- Loopback-only server and trusted Host checks. Protected requests reject mismatched Origin and cross-site/same-site fetch metadata. Unsafe protected requests require exact Origin; authenticated writes also require CSRF.
+- HttpOnly, SameSite=Strict cookies scoped to /api, with one-hour expiry. HTTPS sets Secure; HTTP loopback does not. Sessions are in server memory and restart invalidates them. CSRF stays in client memory.
+- Private responses are no-store. Actual request body size is capped at 256 KiB before parsing. Errors do not echo submitted values, keys, provider bodies or SQL values.
+- Source reads bind to the server session workspace/selected source, and stale source headers fail. Composite foreign keys enforce workspace/source and event/email ownership.
+- Cloud defaults off. Processing requires global enablement plus per-source consent matching mode, URL and model. Scope changes revoke consent unless explicitly re-authorized in that update.
+- Local model URLs must be literal loopback addresses; localhost is canonicalized. Cloud uses HTTPS, verified public DNS addresses pinned with original Host/TLS SNI, no environment proxies or redirects.
+- Remote embedding is rejected. No models or index workers start automatically. Tests use fictional inputs and mock providers/transports.
+
+The fixture preview remains public read-only sample data, separate from private source storage. Preview stars/chat are browser-memory only. No telemetry exporter is configured. Package installation contacts registries; demo runtime needs no outside service.
+
+Private SQLite/WAL storage lives in the user application directory, outside the source repository. It is not encrypted at rest; operating-system disk protection is the appropriate additional layer. Policies persist, session secrets do not. No source or actual mail is automatically imported. credential_ref is only a future reference field; it is not a credential storage implementation.
+
+retain_body=false constrains subsequent ingestion calls; setting it does not yet purge historical data. Memory/profile default off. Historical cleanup, keyring credentials, connector authorization and full deletion remain later milestones and must be ready before their real-source workflows ship.
+
+Index claims are leased and revision/generation-aware; only current acknowledged SQL documents may be retrieved. A concrete writer must enforce durable idempotency and old-version rejection. M2 tests the contract with an in-memory writer. FAISS, actual embedding weights and physical index deletion are not claimed implemented.
+
+This is a single-person local application. Origin checks protect against hostile websites; local malware and OS administrators are outside the application's trust boundary. Keep the app on loopback. Revocation can block results and later calls, but cannot retract a request already sent to a provider.

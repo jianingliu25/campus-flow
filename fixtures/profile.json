@@ -1,0 +1,13 @@
+{
+  "source_id": "demo",
+  "fictional": true,
+  "display_name": "示例同学",
+  "major": "数据科学",
+  "grade": "大三",
+  "preferences": [
+    "机器学习",
+    "自然语言处理",
+    "开源实践",
+    "尽量不排早八"
+  ]
+}
